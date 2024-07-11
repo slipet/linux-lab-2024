@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "linux_list.h"
 #include "list.h"
 
 /* Verify if list is order */
-static bool list_is_ordered(node_t *list)
+static bool __list_is_ordered(node_t *list)
 {
     bool first = true;
     int value;
