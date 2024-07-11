@@ -3,7 +3,7 @@ CFLAGS = -O2 -g -w
 
 all: main
 
-OBJS := main.o list.o
+OBJS := main.o list.o linux_list.o
 deps := $(OBJS:%.o=.%.o.d)
 
 main: $(OBJS)
