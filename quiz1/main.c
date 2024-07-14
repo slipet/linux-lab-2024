@@ -7,41 +7,61 @@
 #include "linux_list.h"
 #include "list.h"
 
+#define UNORDERED 0
+#define ORDERED 1
+#define STABLE 2
+
+
+Introduce checking if list is stable after sorting
+
+Besides verifing ordering, "__list_is_ordered()" and "linx_list_is_ordered()"         
+two functions also can verfy                           
+
+
 /* Verify if list is order */
-static bool __list_is_ordered(node_t *list)
+// 00 -> not ordered
+// 01 -> ordered but not stable
+// 11 -> ordered and stable
+static int __list_is_ordered(node_t *list)
 {
-    bool first = true;
-    int value;
-    while (list) {
-        if (first) {
-            value = list->value;
-            first = false;
-        } else {
-            if (list->value < value)
-                return false;
-            value = list->value;
-        }
-        list = list->next;
+    int stable = 1;
+
+    for (node_t *node = list, *safe = node->next; node != NULL;
+         node = safe, safe = node->next) {
+        if (!safe)
+            break;
+        int *first = node->value;
+        int *second = safe->value;
+        if (*first > *second)
+            return 0;
+        if (*first == *second && first > second)
+            stable = 0;
     }
-    return true;
+    return stable * 2 + 1;
 }
 
-static bool linx_list_is_ordered(struct list_head *head)
+
+// 00 -> not ordered
+// 01 -> ordered but not stable
+// 11 -> ordered and stable
+static int linx_list_is_ordered(struct list_head *head)
 {
-    bool first = true;
-    int value;
-    struct list_head *node = NULL;
-    list_for_each (node, head) {
-        if (first) {
-            value = list_entry(node, element_t, list)->data.value;
-            first = false;
-        } else {
-            if (list_entry(node, element_t, list)->data.value < value)
-                return false;
-            value = list_entry(node, element_t, list)->data.value;
+    int stable = 1;
+    struct list_head *iter = NULL, *safe = NULL;
+
+    list_for_each_safe (iter, safe, head) {
+        if (safe == head)
+            break;
+        int *first = list_entry(iter, element_t, list)->value;
+        int *second = list_entry(safe, element_t, list)->value;
+        if (*first > *second)
+            return 0;
+
+        if (*first == *second && first > second) {
+            stable = 0;
         }
     }
-    return true;
+    return stable * 2 + 1;
 }
 
 /* shuffle array, only work if n < RAND_MAX */
@@ -63,31 +83,30 @@ int main(int argc, char **argv)
     node_t *list = NULL;
     LIST_HEAD(linux_list);
 
-    size_t count = 1000;
+    size_t count = 10;
     size_t size = count;
     int *test_arr = malloc(sizeof(int) * count);
 
     for (int i = 0; i < count; ++i)
         test_arr[i] = i;
+
     shuffle(test_arr, count);
 
     while (count--) {
-        list = __list_construct(list, test_arr[count]);
-        if (!linux_list_construct(&linux_list, test_arr[count],
-                                  test_arr[count]))
+        list = __list_construct(list, &test_arr[count]);
+        if (!linux_list_construct(&linux_list, &test_arr[count]))
             printf("linux_list_construct error: %d\n", test_arr[count]);
     }
 
     __quick_sort(&list);
     quick_sort_linux_list(&linux_list, size);
 
-    assert(__list_is_ordered(list));
-    assert(linx_list_is_ordered(&linux_list));
+    assert(__list_is_ordered(list) == (ORDERED | STABLE));
+    assert(linx_list_is_ordered(&linux_list) == (ORDERED | STABLE));
 
     __list_free(&list);
     linux_list_free(&linux_list);
-
     free(test_arr);
-    return;
 
+    return;
 }

@@ -435,16 +435,10 @@ static inline void list_move_tail(struct list_head *node,
 #endif
 
 typedef struct {
-    long value;
-    long ordered;
-} Data;
-
-typedef struct {
-    struct list_head left, right;
     struct list_head list;
-    Data data;
+    long *value;
 } element_t;
 
-bool linux_list_construct(struct list_head *, int, int);
+bool linux_list_construct(struct list_head *, int *);
 // void print_linux_list(struct list_head *);
 void linux_list_free(struct list_head *);

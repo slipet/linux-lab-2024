@@ -1,14 +1,13 @@
 #include "linux_list.h"
 
-bool linux_list_construct(struct list_head *head, int value, int ordered)
+bool linux_list_construct(struct list_head *head, int *value)
 {
     if (head == NULL)
         return false;
 
     element_t *new_element = malloc(sizeof(element_t));
     INIT_LIST_HEAD(&new_element->list);
-    new_element->data.value = value;
-    new_element->data.ordered = ordered;
+    new_element->value = value;
     list_add(&new_element->list, head);
 
     return true;
@@ -18,17 +17,7 @@ void print_linux_list(struct list_head *head)
     struct list_head *node;
     list_for_each (node, head) {
         element_t *element = list_entry(node, element_t, list);
-        printf("%d -> ", element->data.value);
-    }
-    printf("\n");
-}
-
-void print_linux_list_head2end(struct list_head *head, struct list_head *end)
-{
-    struct list_head *node;
-    for (node = (head); node != (end); node = node->next) {
-        element_t *element = list_entry(node, element_t, list);
-        printf("%d -> ", element->data.value);
+        printf("%d -> ", *element->value);
     }
     printf("\n");
 }
@@ -57,6 +46,8 @@ struct list_head *linux_list_new()
     return linux_list;
 }
 
+
+
 void quick_sort_linux_list(struct list_head **head, size_t size)
 {
     if (head == NULL || list_empty(head) || list_is_singular(head))
@@ -76,13 +67,13 @@ void quick_sort_linux_list(struct list_head **head, size_t size)
         struct list_head *L = &heads[i], *R = &heads[i + 2];
         if (!list_empty(L) && !list_is_singular(L)) {
             struct list_head *pivot = L->next;
-            value = list_entry(pivot, element_t, list)->data.value;
+            value = *list_entry(pivot, element_t, list)->value;
             list_move_tail(pivot, &heads[i + 1]);
 
             struct list_head *iter, *safe;
 
             list_for_each_safe (iter, safe, L) {
-                if (list_entry(iter, element_t, list)->data.value <= value) {
+                if (*list_entry(iter, element_t, list)->value <= value) {
                     list_move_tail(iter, R);
                 }
             }

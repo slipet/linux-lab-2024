@@ -31,7 +31,7 @@ int __list_length(node_t **left)
     return n;
 }
 
-node_t *__list_construct(node_t *list, int n)
+node_t *__list_construct(node_t *list, int *n)
 {
     node_t *node = malloc(sizeof(node_t));
     node->next = list;
@@ -68,14 +68,14 @@ void __quick_sort(node_t **list)
 
         if (L != R) {
             node_t *pivot = L;
-            value = pivot->value;
+            value = *pivot->value;
             node_t *p = pivot->next;
             pivot->next = NULL;
 
             while (p) {
                 node_t *n = p;
                 p = p->next;
-                __list_add(n->value > value ? &right : &left, n);
+                __list_add(*n->value > value ? &right : &left, n);
             }
 
             begin[i] = left;
