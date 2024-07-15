@@ -50,6 +50,27 @@ void __list_free(node_t **list)
     }
 }
 
+/* Verify if list is order */
+// 00 -> not ordered
+// 01 -> ordered but not stable
+// 11 -> ordered and stable
+int __list_is_ordered(node_t *list)
+{
+    int stable = 1;
+
+    for (node_t *node = list, *safe = node->next; node != NULL;
+         node = safe, safe = node->next) {
+        if (!safe)
+            break;
+        int *first = node->value;
+        int *second = safe->value;
+        if (*first > *second)
+            return 0;
+        if (*first == *second && first > second)
+            stable = 0;
+    }
+    return stable * 2 + 1;
+}
 
 void __quick_sort(node_t **list)
 {

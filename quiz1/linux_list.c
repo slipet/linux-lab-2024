@@ -46,13 +46,44 @@ struct list_head *linux_list_new()
     return linux_list;
 }
 
+size_t linux_list_length(struct list_head *head)
+{
+    int length = 0;
+    struct list_head *iter;
+    list_for_each (iter, head) {
+        length++;
+    }
+    return length;
+}
 
+// 00 -> not ordered
+// 01 -> ordered but not stable
+// 11 -> ordered and stable
+int linx_list_is_ordered(struct list_head *head)
+{
+    int stable = 1;
+    struct list_head *iter = NULL, *safe = NULL;
 
-void quick_sort_linux_list(struct list_head **head, size_t size)
+    list_for_each_safe (iter, safe, head) {
+        if (safe == head)
+            break;
+        int *first = list_entry(iter, element_t, list)->value;
+        int *second = list_entry(safe, element_t, list)->value;
+        if (*first > *second)
+            return 0;
+
+        if (*first == *second && first > second) {
+            stable = 0;
+        }
+    }
+    return stable * 2 + 1;
+}
+
+void quick_sort_linux_list(struct list_head **head)
 {
     if (head == NULL || list_empty(head) || list_is_singular(head))
         return;
-
+    size_t size = linux_list_length(head);
     int value;
     int i = 0;
     const int max_level = 2 * size;

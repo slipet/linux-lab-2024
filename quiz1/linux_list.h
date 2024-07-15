@@ -441,3 +441,7 @@ typedef struct {
 
 bool linux_list_construct(struct list_head *, int *);
 void linux_list_free(struct list_head *);
+void quick_sort_linux_list(struct list_head **);
+size_t linux_list_length(struct list_head *);
+void print_linux_list(struct list_head *);
+int linx_list_is_ordered(struct list_head *);
