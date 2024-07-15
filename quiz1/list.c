@@ -12,11 +12,11 @@ node_t *__list_tail(node_t **left)
         left = &((*left)->next);
     return *left;
 }
-void __printList(node_t *left)
+void __print_list(node_t *list)
 {
-    while (left) {
-        printf("%ld -> ", left->value);
-        left = left->next;
+    while (list) {
+        printf("%d -> ", *(list->value));
+        list = list->next;
     }
     printf("\n");
     return;
@@ -68,14 +68,14 @@ void __quick_sort(node_t **list)
 
         if (L != R) {
             node_t *pivot = L;
-            value = *pivot->value;
+            value = *(pivot->value);
             node_t *p = pivot->next;
             pivot->next = NULL;
 
             while (p) {
                 node_t *n = p;
                 p = p->next;
-                __list_add(*n->value > value ? &right : &left, n);
+                __list_add(*(n->value) > value ? &right : &left, n);
             }
 
             begin[i] = left;

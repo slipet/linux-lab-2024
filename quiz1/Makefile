@@ -14,7 +14,6 @@ $.o: %.c
 
 test: main
 	@./main
-
 format:
 	clang-format -i *.[ch]
 

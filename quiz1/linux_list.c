@@ -62,7 +62,6 @@ void quick_sort_linux_list(struct list_head **head, size_t size)
         INIT_LIST_HEAD(&heads[i]);
     list_splice_init(head, &heads[0]);
 
-    int k = 0;
     while (i >= 0) {
         struct list_head *L = &heads[i], *R = &heads[i + 2];
         if (!list_empty(L) && !list_is_singular(L)) {
@@ -77,7 +76,6 @@ void quick_sort_linux_list(struct list_head **head, size_t size)
                     list_move_tail(iter, R);
                 }
             }
-
             i += 2;
         } else {
             if (!list_empty(L))
