@@ -100,13 +100,13 @@ void quick_sort_linux_list(struct list_head **head)
         if (!list_empty(L) && !list_is_singular(L)) {
             struct list_head *pivot = L->next;
             value = *list_entry(pivot, element_t, list)->value;
-            list_move_tail(pivot, &heads[i + 1]);
+            list_move(pivot, &heads[i + 1]);
 
             struct list_head *iter, *safe;
 
             list_for_each_safe (iter, safe, L) {
                 if (*list_entry(iter, element_t, list)->value <= value) {
-                    list_move_tail(iter, R);
+                    list_move(iter, R);
                 }
             }
             i += 2;
