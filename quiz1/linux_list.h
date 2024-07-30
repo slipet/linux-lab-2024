@@ -8,6 +8,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 /* "typeof" is a GNU extension.
  * Reference: https://gcc.gnu.org/onlinedocs/gcc/Typeof.html
  */
@@ -436,10 +437,10 @@ static inline void list_move_tail(struct list_head *node,
 
 typedef struct {
     struct list_head list;
-    int *value;
+    uint32_t *value;
 } element_t;
 
-bool linux_list_construct(struct list_head *, int *);
+bool linux_list_construct(struct list_head *, uint32_t *);
 void linux_list_free(struct list_head *);
 void quick_sort_linux_list(struct list_head **);
 size_t linux_list_length(struct list_head *);

@@ -15,7 +15,7 @@ node_t *__list_tail(node_t **left)
 void __print_list(node_t *list)
 {
     while (list) {
-        printf("%d -> ", *(list->value));
+        printf("%u -> ", *(list->value));
         list = list->next;
     }
     printf("\n");
@@ -31,7 +31,7 @@ int __list_length(node_t **left)
     return n;
 }
 
-node_t *__list_construct(node_t *list, int *n)
+node_t *__list_construct(node_t *list, uint32_t *n)
 {
     node_t *node = malloc(sizeof(node_t));
     node->next = list;
@@ -74,8 +74,8 @@ int __list_is_ordered(node_t *list)
 
 void __quick_sort(node_t **list)
 {
-    int n = __list_length(list);
-    int value;
+    size_t n = __list_length(list);
+    uint32_t value;
     int i = 0;
     int max_level = 2 * n;
     node_t *begin[max_level], *end[max_level];

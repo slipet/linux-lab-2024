@@ -1,6 +1,6 @@
 #include "linux_list.h"
 
-bool linux_list_construct(struct list_head *head, int *value)
+bool linux_list_construct(struct list_head *head, uint32_t *value)
 {
     if (head == NULL)
         return false;
@@ -17,7 +17,7 @@ void print_linux_list(struct list_head *head)
     struct list_head *node;
     list_for_each (node, head) {
         element_t *element = list_entry(node, element_t, list);
-        printf("%d -> ", *element->value);
+        printf("%u -> ", *element->value);
     }
     printf("\n");
 }
@@ -84,7 +84,7 @@ void quick_sort_linux_list(struct list_head **head)
     if (head == NULL || list_empty(head) || list_is_singular(head))
         return;
     size_t size = linux_list_length(head);
-    int value;
+    uint32_t value;
     int i = 0;
     const int max_level = 2 * size;
     struct list_head heads[max_level];
