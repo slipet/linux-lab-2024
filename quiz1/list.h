@@ -2,6 +2,9 @@
 #define __LIST__
 #include <stddef.h>
 #include <stdint.h>
+
+#define TEST_STABLE 0
+
 typedef struct __node {
     struct __node *left, *right;
     struct __node *next;

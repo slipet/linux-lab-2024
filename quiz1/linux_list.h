@@ -435,6 +435,8 @@ static inline void list_move_tail(struct list_head *node,
 }
 #endif
 
+#define TEST_STABLE 1
+
 typedef struct {
     struct list_head list;
     uint32_t *value;
