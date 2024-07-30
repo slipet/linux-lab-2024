@@ -48,7 +48,7 @@ struct list_head *linux_list_new()
 
 size_t linux_list_length(struct list_head *head)
 {
-    int length = 0;
+    size_t length = 0;
     struct list_head *iter;
     list_for_each (iter, head) {
         length++;
@@ -67,15 +67,17 @@ int linx_list_is_ordered(struct list_head *head)
     list_for_each_safe (iter, safe, head) {
         if (safe == head)
             break;
-        int *first = list_entry(iter, element_t, list)->value;
-        int *second = list_entry(safe, element_t, list)->value;
+        uint32_t *first = list_entry(iter, element_t, list)->value;
+        uint32_t *second = list_entry(safe, element_t, list)->value;
         if (*first > *second)
             return 0;
-
+#ifdef TEST_STABLE == TRUE
         if (*first == *second && first > second) {
             stable = 0;
         }
+#endif
     }
+
     return stable * 2 + 1;
 }
 
@@ -86,8 +88,8 @@ void quick_sort_linux_list(struct list_head **head)
     size_t size = linux_list_length(head);
     uint32_t value;
     int i = 0;
-    const int max_level = 2 * size;
-    struct list_head heads[max_level];
+    const uint32_t max_level = 2 * size;
+    struct list_head *heads = malloc(sizeof(struct list_head) * max_level);
     LIST_HEAD(result);
     for (int i = 0; i < max_level; i++)
         INIT_LIST_HEAD(&heads[i]);

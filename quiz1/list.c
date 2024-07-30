@@ -21,7 +21,7 @@ void __print_list(node_t *list)
     printf("\n");
     return;
 }
-int __list_length(node_t **left)
+size_t __list_length(node_t **left)
 {
     int n = 0;
     while (*left) {
@@ -62,13 +62,15 @@ int __list_is_ordered(node_t *list)
          node = safe, safe = node->next) {
         if (!safe)
             break;
-        int *first = node->value;
-        int *second = safe->value;
+        uint32_t *first = node->value;
+        uint32_t *second = safe->value;
         if (*first > *second)
             return 0;
+#ifdef TEST_STABLE == TRUE
         if (*first == *second && first > second)
             stable = 0;
     }
+#endif
     return stable * 2 + 1;
 }
 
@@ -78,7 +80,9 @@ void __quick_sort(node_t **list)
     uint32_t value;
     int i = 0;
     int max_level = 2 * n;
-    node_t *begin[max_level], *end[max_level];
+    node_t **begin = malloc(sizeof(node_t *) * max_level);
+    node_t **end = malloc(sizeof(node_t *) * max_level);
+    // node_t **begin[max_level], **end[max_level];
     node_t *result = NULL, *left = NULL, *right = NULL;
 
     begin[0] = *list;
