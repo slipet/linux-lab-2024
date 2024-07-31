@@ -15,7 +15,7 @@ double delta_time(double *timep)
     return delta;
 }
 
-void test_list(expConfig *config, testCases *tests, char *result)
+double test_list(expConfig *config, testCases *tests, char *result)
 {
     double time_start, time_end, delta;
     node_t *list = NULL;
@@ -38,8 +38,9 @@ void test_list(expConfig *config, testCases *tests, char *result)
     // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
     sprintf(result, "%u %.6f %.6f\n", tests->size, elapsed, delta);
     config->list_free(&list);
+    return elapsed;
 }
-void test_linux_list(expConfig *config, testCases *tests, char *result)
+double test_linux_list(expConfig *config, testCases *tests, char *result)
 {
     double time_start, time_end, delta;
     LIST_HEAD(linux_list);
@@ -65,6 +66,7 @@ void test_linux_list(expConfig *config, testCases *tests, char *result)
     // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
     sprintf(result, "%u %.6f %.6f\n", tests->size, elapsed, delta);
     config->list_free(&linux_list);
+    return elapsed;
 }
 
 testCases *init_testcases(uint32_t *data, size_t size)

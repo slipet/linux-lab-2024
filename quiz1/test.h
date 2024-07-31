@@ -44,8 +44,8 @@ typedef struct {
 
 void init_time(double *);
 double delta_time(double *);
-void test_list(expConfig *, testCases *, char *);
-void test_linux_list(expConfig *, testCases *, char *);
+double test_list(expConfig *, testCases *, char *);
+double test_linux_list(expConfig *, testCases *, char *);
 testCases *init_testcases(uint32_t *, size_t);
 void free_testcases(testCases *);
 uint32_t *read_testcases(char *, uint32_t *);
