@@ -15,7 +15,7 @@ double delta_time(double *timep)
     return delta;
 }
 
-double test_list(expConfig *config, testCases *tests, char *result)
+double test_list(expConfig *config, testCases *tests)
 {
     double time_start, time_end, delta;
     node_t *list = NULL;
@@ -36,11 +36,10 @@ double test_list(expConfig *config, testCases *tests, char *result)
     // sprintf(result, "%s: Elapsed time = %.3f, Delta time =
     // %.3f\n",config->algoName, elapsed, delta); sprintf(result, "%u %.3f
     // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
-    sprintf(result, "%u %.6f %.6f\n", tests->size, elapsed, delta);
     config->list_free(&list);
     return elapsed;
 }
-double test_linux_list(expConfig *config, testCases *tests, char *result)
+double test_linux_list(expConfig *config, testCases *tests)
 {
     double time_start, time_end, delta;
     LIST_HEAD(linux_list);
@@ -64,7 +63,6 @@ double test_linux_list(expConfig *config, testCases *tests, char *result)
     // sprintf(result, "%s: Elapsed time = %.3f, Delta time =
     // %.3f\n",config->algoName, elapsed, delta); sprintf(result, "%u %.3f
     // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
-    sprintf(result, "%u %.6f %.6f\n", tests->size, elapsed, delta);
     config->list_free(&linux_list);
     return elapsed;
 }
@@ -162,6 +160,7 @@ void fixed_quantity_test(expConfig *config,
     for (size_t i = 0; i < 3; i++) {
         path->tag = tagSet[i];
         for (size_t i = 0; i < maxBits; i++) {
+            double retTime[algo_num];
             char result[algo_num][512];
             size_t size = 1 << i;
 
@@ -174,8 +173,8 @@ void fixed_quantity_test(expConfig *config,
             printf("test case: %s\n", dataname);
             uint32_t *data = read_testcases(dataname, &size);
             testCases *Data = init_testcases(data, size);
-            test_list(&config[0], Data, &result[0]);
-            test_linux_list(&config[1], Data, &result[1]);
+            retTime[0] = test_list(&config[0], Data);
+            retTime[1] = test_linux_list(&config[1], Data);
 
             // Output the result
             path->suffix = &".txt";
@@ -184,6 +183,8 @@ void fixed_quantity_test(expConfig *config,
                 path->prefix = config[i].algoName;
                 char *resultname = getFileName(path, 0);
                 FILE *fp = fopen(resultname, "a");
+                sprintf(result[i], "%u %.6f\n", size, retTime[i]);
+
                 fprintf(fp, "%s", result[i]);
                 fclose(fp);
                 free(resultname);
@@ -206,6 +207,7 @@ void random_quantity_test(expConfig *config,
                         int ordered)
 {
     for (size_t i = 0; i < times; i++) {
+        double retTime[algo_num];
         char result[algo_num][512];
         size_t data_size = get_random(0, 1, (1 << 17));
         uint32_t *data = gen_test_case(data_size, ordered);
@@ -232,12 +234,14 @@ void random_quantity_test(expConfig *config,
         }
 
         testCases *Data = init_testcases(data, data_size);
-        test_list(&config[0], Data, &result[0]);
-        test_linux_list(&config[1], Data, &result[1]);
+        retTime[0] = test_list(&config[0], Data);
+        retTime[1] = test_linux_list(&config[1], Data);
         for (size_t i = 0; i < algo_num; i++) {
             path->prefix = config[i].algoName;
             char *resultname = getFileName(path, 0);
             FILE *fp = fopen(resultname, "a");
+            sprintf(result[i], "%u %.6f\n", data_size, retTime[i]);
+            
             fprintf(fp, "%s", result[i]);
             fclose(fp);
             free(resultname);
