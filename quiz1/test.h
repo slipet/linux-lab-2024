@@ -50,6 +50,6 @@ testCases *init_testcases(uint32_t *, size_t);
 void free_testcases(testCases *);
 uint32_t *read_testcases(char *, uint32_t *);
 char *getFileName(Path_t *, size_t);
-void fixed_amount_test(expConfig *, Path_t *, const size_t, const size_t);
-void random_amount_test(expConfig *, Path_t *, const size_t, const size_t, int);
+void fixed_quantity_test(expConfig *, Path_t *, const size_t, const size_t);
+void random_quantity_test(expConfig *, Path_t *, const size_t, const size_t, int);
 #endif

@@ -150,7 +150,7 @@ char *getFileName(Path_t *path, size_t size)
     return filename;
 }
 
-void fixed_amount_test(expConfig *config,
+void fixed_quantity_test(expConfig *config,
                        Path_t *path,
                        const size_t maxBits,
                        const size_t algo_num)
@@ -197,7 +197,7 @@ void fixed_amount_test(expConfig *config,
     }
 }
 
-void random_amount_test(expConfig *config,
+void random_quantity_test(expConfig *config,
                         Path_t *path,
                         const size_t times,
                         const size_t algo_num,
@@ -214,16 +214,16 @@ void random_amount_test(expConfig *config,
         path->prefix = config->algoName;
         switch (ordered) {
         case 0:
-            path->tag = &"sorted";
-            data = proc_data_reverse(data, data_size);
+            path->tag = &"reverse";
+            //data = proc_data_reverse(data, data_size);
             break;
         case 1:
             path->tag = &"sorted";
-            data = proc_sorted_data(data, data_size, 1, 1);
+            //data = proc_sorted_data(data, data_size, 1, 1);
             break;
         case 2:
             path->tag = &"random";
-            data = proc_sorted_data(data, data_size, 1, 0);
+            //data = proc_sorted_data(data, data_size, 1, 0);
             break;
         default:
             break;

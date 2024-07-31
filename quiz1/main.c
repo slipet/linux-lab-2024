@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     init_linux_list_config(&config[1]);
 
     // fixed_amount_test(config, path, maxBits, algo_num);
-    random_amount_test(config, path, 2500, algo_num, 2);
+    random_quantity_test(config, path, 2500, algo_num, 1);
 
 
 
