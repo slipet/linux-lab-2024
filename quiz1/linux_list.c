@@ -105,14 +105,14 @@ void quick_sort_linux_list(struct list_head **head)
             struct list_head *iter, *safe;
 
             list_for_each_safe (iter, safe, L) {
-                if (*list_entry(iter, element_t, list)->value <= value) {
+                if (*list_entry(iter, element_t, list)->value > value) {
                     list_move(iter, R);
                 }
             }
             i += 2;
         } else {
             if (!list_empty(L))
-                list_splice_tail_init(L, &result);
+                list_splice_init(L, &result);
             i--;
         }
     }
