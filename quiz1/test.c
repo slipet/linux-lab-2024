@@ -7,9 +7,10 @@ void init_time(double *timep)
 
 double delta_time(double *timep)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    double current_time = tv.tv_sec + 1.0E-6 * tv.tv_usec;
+    struct timespec tv;
+    // gettimeofday(&tv, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &tv);
+    double current_time = 1.0E3 * tv.tv_sec + 1.0E-6 * tv.tv_nsec;
     double delta = current_time - *timep;
     *timep = current_time;
     return delta;
@@ -31,13 +32,8 @@ double test_list(expConfig *config, testCases *tests)
     config->algorithm(&list);
 
     delta = delta_time(&time_end);
-    double elapsed = time_end - time_start;
-    // assert(config->validation(list));
-    // sprintf(result, "%s: Elapsed time = %.3f, Delta time =
-    // %.3f\n",config->algoName, elapsed, delta); sprintf(result, "%u %.3f
-    // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
     config->list_free(&list);
-    return elapsed;
+    return delta;
 }
 double test_linux_list(expConfig *config, testCases *tests)
 {
@@ -56,15 +52,10 @@ double test_linux_list(expConfig *config, testCases *tests)
     time_start = time_end;
     // sort list
     config->algorithm(&linux_list);
-
     delta = delta_time(&time_end);
     double elapsed = time_end - time_start;
-    // assert(config->validation(&linux_list));
-    // sprintf(result, "%s: Elapsed time = %.3f, Delta time =
-    // %.3f\n",config->algoName, elapsed, delta); sprintf(result, "%u %.3f
-    // %.3f\n",__builtin_ctzl(tests->size), elapsed, delta);
     config->list_free(&linux_list);
-    return elapsed;
+    return delta;
 }
 
 testCases *init_testcases(uint32_t *data, size_t size)
@@ -179,13 +170,13 @@ void fixed_quantity_test(expConfig *config,
             // Output the result
             path->suffix = &".txt";
             path->root = &"./result/";
-            for (size_t i = 0; i < algo_num; i++) {
-                path->prefix = config[i].algoName;
+            for (size_t k = 0; k < algo_num; k++) {
+                path->prefix = config[k].algoName;
                 char *resultname = getFileName(path, 0);
                 FILE *fp = fopen(resultname, "a");
-                sprintf(result[i], "%u %.6f\n", size, retTime[i]);
+                sprintf(result[k], "%u %.6f\n", size, retTime[k]);
 
-                fprintf(fp, "%s", result[i]);
+                fprintf(fp, "%s", result[k]);
                 fclose(fp);
                 free(resultname);
             }
@@ -241,7 +232,7 @@ void random_quantity_test(expConfig *config,
             char *resultname = getFileName(path, 0);
             FILE *fp = fopen(resultname, "a");
             sprintf(result[i], "%u %.6f\n", data_size, retTime[i]);
-            
+
             fprintf(fp, "%s", result[i]);
             fclose(fp);
             free(resultname);
