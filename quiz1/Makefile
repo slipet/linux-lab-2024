@@ -27,6 +27,10 @@ test: main
 format:
 	clang-format -i *.[ch]
 
+perf: main
+	sudo perf record -g ./main
+	sudo perf report --symbol-filter=__quick_sort
+
 clean_result:
 	rm -f ./result/*.txt
 clean:
