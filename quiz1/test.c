@@ -142,18 +142,18 @@ char *getFileName(Path_t *path, size_t size)
 }
 
 void fixed_quantity_test(expConfig *config,
-                       Path_t *path,
-                       const size_t maxBits,
-                       const size_t algo_num)
+                         Path_t *path,
+                         const size_t maxBits,
+                         const size_t algo_num)
 {
     char *tagSet[] = {"sorted_", "reverse_", "random_"};
 
     for (size_t i = 0; i < 3; i++) {
         path->tag = tagSet[i];
-        for (size_t i = 0; i < maxBits; i++) {
+        for (size_t j = 0; j < maxBits; j++) {
             double retTime[algo_num];
             char result[algo_num][512];
-            size_t size = 1 << i;
+            size_t size = 1 << j;
 
             path->root = &"./test_cases/";
             path->prefix = &"test_case_";
@@ -192,15 +192,16 @@ void fixed_quantity_test(expConfig *config,
 }
 
 void random_quantity_test(expConfig *config,
-                        Path_t *path,
-                        const size_t times,
-                        const size_t algo_num,
-                        int ordered)
+                          Path_t *path,
+                          const size_t maxBits,
+                          const size_t times,
+                          const size_t algo_num,
+                          int ordered)
 {
-    for (size_t i = 0; i < times; i++) {
+    for (size_t j = 0; j < times; j++) {
         double retTime[algo_num];
         char result[algo_num][512];
-        size_t data_size = get_random(0, 1, (1 << 17));
+        size_t data_size = get_random(0, 1, (1 << maxBits));
         uint32_t *data = gen_test_case(data_size, ordered);
 
         // Output the result
