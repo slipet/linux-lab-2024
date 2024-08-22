@@ -55,6 +55,11 @@ uint32_t *proc_data_reverse(uint32_t *data, size_t size)
     qsort((void *) data, size, sizeof(uint32_t), compare);
     int flag = 0;
     int l = 0, r = size - 1;
+    for(int i = 1; i < size; i++) {
+        if(data[i] == data[i - 1]) {
+            data[i] += 1;
+        }
+    }
     for (int i = size - 1; i >= 0; i--) {
         if (!flag)
             ret[r--] = data[i];
@@ -143,7 +148,7 @@ char *getPath(char *path, size_t size, int ordered)
 }
 uint32_t *gen_test_case(size_t size, int ordered)
 {
-    uint32_t n = 100000;
+    uint32_t n = 1E9;
     uint32_t *data = gen_data(size, 1, n);
     switch (ordered) {
     case 0:
