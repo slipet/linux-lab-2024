@@ -160,3 +160,59 @@ uint32_t *gen_test_case(size_t size, int ordered)
 
     return data;
 }
+
+
+
+static int cmp(const void *a, const void *b)
+{
+    double diff = (*(double *) a - *(double *) b);
+    if (fabs(diff) < EPSILON)
+        return 0;
+    else if (diff < 0)
+        return -1;
+    else
+        return 1;
+}
+
+static double percentile(double *a_sorted, double which, size_t size)
+{
+    size_t array_position = (size_t) ((double) size * (double) which);
+
+    return a_sorted[array_position];
+}
+void prepare_percentiles(double *exec_times, double *percentiles, size_t size)
+{
+    qsort(exec_times, size, sizeof(double),
+          (int (*)(const void *, const void *)) cmp);
+
+    for (size_t i = 0; i < DUDECT_NUMBER_PERCENTILES; i++) {
+        percentiles[i] = percentile(
+            exec_times,
+            1 - (pow(0.5, 10 * (double) (i + 1) / DUDECT_NUMBER_PERCENTILES)),
+            size);
+    }
+}
+void update_data(result_t *data, double *percentiles, size_t size)
+{
+    data->weight = malloc(sizeof(double) * size);
+    data->processed_size = 0;
+    for (size_t i = 0; i < size; i++) {
+        size_t cnt = 0;
+        for (size_t j = 0; j < DUDECT_NUMBER_PERCENTILES; ++j) {
+            if (percentiles[j] - data->execTime[i] > EPSILON)
+                cnt++;
+        }
+        data->weight[i] = (1.0f * cnt);
+        data->processed_size += cnt;
+    }
+}
+
+double proc_result(double *times, const size_t size)
+{
+    double avg = 0.0f;
+    for (size_t j = 0; j < size; ++j) {
+        avg += times[j];
+    }
+    avg /= (double) size;
+    return avg;
+}
