@@ -49,6 +49,14 @@ uint32_t *proc_sorted_data(uint32_t *data, size_t size, int groups, int sorted)
     return data;
 }
 
+uint32_t *proc_duplicate_data(uint32_t *data, size_t size)
+{
+    uint32_t *ret = (uint32_t *) malloc(sizeof(uint32_t) * size);
+    for(size_t i = 0; i < size; ++i)
+        ret[i] = data[0];
+    return ret;
+}
+
 uint32_t *proc_data_reverse(uint32_t *data, size_t size)
 {
     uint32_t *ret = (uint32_t *) malloc(sizeof(uint32_t) * size);
@@ -159,6 +167,10 @@ uint32_t *gen_test_case(size_t size, int ordered)
         break;
     case 2:
         data = proc_sorted_data(data, size, 1, 0);  // random
+        break;
+    case 4:
+        data = proc_duplicate_data(data, size);  // random
+        break;
     default:
         break;
     }

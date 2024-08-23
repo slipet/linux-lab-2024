@@ -211,15 +211,15 @@ void random_quantity_test(expConfig *config,
         switch (ordered) {
         case 0:
             path->tag = &"reverse";
-            //data = proc_data_reverse(data, data_size);
+            // data = proc_data_reverse(data, data_size);
             break;
         case 1:
             path->tag = &"sorted";
-            //data = proc_sorted_data(data, data_size, 1, 1);
+            // data = proc_sorted_data(data, data_size, 1, 1);
             break;
         case 2:
             path->tag = &"random";
-            //data = proc_sorted_data(data, data_size, 1, 0);
+            // data = proc_sorted_data(data, data_size, 1, 0);
             break;
         default:
             break;
