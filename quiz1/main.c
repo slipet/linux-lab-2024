@@ -54,10 +54,18 @@ int main(int argc, char **argv)
     init_linux_list_config(&config[1]);
 
     // fixed_amount_test(config, path, maxBits, algo_num);
-    random_quantity_test(config, path, 2500, algo_num, 1);
+    // random_quantity_test(config, path, 17, 2500, algo_num, 1);
+    // path = INIT_PATH_T("./test_cases/percenttiles_", "", "", "random_");
+    // repeated_fixed_quantity_test(config, path, SAMPLE_GROUPS_SIZE, 100,
+    // algo_num, 2);
+    path = INIT_PATH_T("./test_cases/percenttiles_", "", "", "duplicate_20240821_");
+    repeated_fixed_quantity_test(config, path, SAMPLE_GROUPS_SIZE, 100,
+                                 algo_num, 4);
 
-
+    // uint32_t *data = gen_test_case(20, 0);
+    // testCases *Data = init_testcases(data, 20);
+    // test_list(&config[0], Data);
+    // test_linux_list(&config[1], Data);
 
     return 0;
-
 }

@@ -12,8 +12,11 @@
 #include "linux_list.h"
 #include "list.h"
 #include "proc_data.h"
-// static double first_time, last_time;
-// struct timeval tv;
+
+#define LIST_SORT 0
+#define LINUX_LIST_SORT 1
+#define SAMPLE_GROUPS_SIZE 19
+
 
 #define INIT_PATH_T(ROOT, PREFIX, SUFFIX, TAG)                     \
     &(Path_t)                                                      \
@@ -34,6 +37,16 @@ typedef struct {
     uint32_t *data;
     size_t size;
 } testCases;
+
+typedef struct {
+    result_t *groups;
+    size_t size;
+} TEST_METHOD_T;
+
+typedef struct {
+    TEST_METHOD_T *methods;
+    size_t size;
+} TEST_RESULT_T;
 
 typedef struct {
     void (*algorithm)(void **);
