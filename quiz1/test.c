@@ -247,3 +247,278 @@ void random_quantity_test(expConfig *config,
             "==\n");
     }
 }
+TEST_RESULT_T *INIT_TEST_RESULT_T(size_t methods_size,
+                                  size_t groups_size,
+                                  size_t sample_size)
+{
+    TEST_RESULT_T *tmp = malloc(sizeof(TEST_RESULT_T));
+    tmp->methods = malloc(sizeof(TEST_METHOD_T) * methods_size);
+    tmp->size = methods_size;
+    for (size_t i = 0; i < tmp->size; i++) {
+        tmp->methods[i].size = groups_size;
+        tmp->methods[i].groups = malloc(sizeof(result_t) * groups_size);
+    }
+    return tmp;
+}
+void FREE_TEST_RESULT_T(TEST_RESULT_T *obj)
+{
+    int cnt = 0;
+    for (size_t i = 0; i < obj->size; i++) {
+        for (size_t j = 0; j < obj->methods[i].size; j++) {
+            free(obj->methods[i].groups[j].execTime);
+            free(obj->methods[i].groups[j].weight);
+        }
+        free(obj->methods[i].groups);
+    }
+
+    free(obj->methods);
+    free(obj);
+    obj = NULL;
+}
+void repeated_fixed_quantity_test(expConfig *config,
+                                  Path_t *path,
+                                  const size_t maxBits,
+                                  const size_t repeat_times,
+                                  const size_t algo_num,
+                                  int ordered)
+{
+    TEST_RESULT_T *result = INIT_TEST_RESULT_T(algo_num, maxBits, repeat_times);
+
+    for (size_t i = 0; i < maxBits; i++) {
+        size_t data_size = 1 << i;
+
+        double retTime[algo_num][repeat_times];
+
+        // Output the result
+        path->suffix = &"repeated.txt";
+        path->root = &"./result/percenttiles_";
+        for (size_t algo = 0; algo < algo_num; algo++) {
+            result->methods[algo].groups[i].execTime =
+                malloc(sizeof(double) * repeat_times);
+            result->methods[algo].groups[i].size = repeat_times;
+        }
+        printf("Data size: %lu\n", data_size);
+        for (size_t t = 0; t < repeat_times; ++t) {
+            printf("        epoch: %lu\n", t);
+            struct timeval time_start, time_end;
+            double delta;
+            init_time(&time_end);
+            time_start = time_end;
+
+            uint32_t *data = gen_test_case(data_size, ordered);
+            delta = delta_time(&time_end);
+            printf("        data genration time: %lf\n", delta);
+            time_start = time_end;
+            testCases *Data = init_testcases(data, data_size);
+            delta = delta_time(&time_end);
+            printf("        data initialization time: %lf\n", delta);
+            time_start = time_end;
+            // exec sorting
+
+            result->methods[LIST_SORT].groups[i].execTime[t] =
+                test_list(&config[0], Data);
+            delta = delta_time(&time_end);
+            printf("        list time: %f\n", delta);
+            time_start = time_end;
+            result->methods[LINUX_LIST_SORT].groups[i].execTime[t] =
+                test_linux_list(&config[1], Data);
+            delta = delta_time(&time_end);
+            printf("        linux list time: %f\n", delta);
+            free_testcases(Data);
+        }
+        struct timeval time_start, time_end;
+        double delta;
+        init_time(&time_end);
+        time_start = time_end;
+        for (size_t j = 0; j < algo_num; ++j) {
+            double *percentiles =
+                malloc(sizeof(double) * DUDECT_NUMBER_PERCENTILES);
+            prepare_percentiles(result->methods[j].groups[i].execTime,
+                                percentiles, repeat_times);
+            update_data(&(result->methods[j].groups[i]), percentiles,
+                        repeat_times);
+            double avg = calculate_mean(result->methods[j].groups[i].execTime,
+                                        result->methods[j].groups[i].weight,
+                                        result->methods[j].groups[i].size);
+
+            char str[algo_num][512];
+            path->prefix = config[j].algoName;
+            char *resultname = getFileName(path, 0);
+            FILE *fp = fopen(resultname, "a");
+            sprintf(str[j], "%u %.6f\n", data_size, avg);
+            fprintf(fp, "%s", str[j]);
+            fclose(fp);
+            free(resultname);
+        }
+        delta = delta_time(&time_end);
+        printf("output: %f\n\n", delta);
+    }
+    calculate_Fvalue(result);
+    FREE_TEST_RESULT_T(result);
+}
+
+
+double calculate_mean(double *time, double *weight, size_t size)
+{
+    double sum = 0.0f;
+    double sz = 0.0f;
+    for (size_t i = 0; i < size; ++i) {
+        sum += time[i] * weight[i];
+        sz += weight[i];
+    }
+    return sum / sz;
+}
+double calculate_totalmean(TEST_RESULT_T *test)
+{
+    double sum = 0.0f;
+    double sz = 0.0f;
+    for (size_t method = 0; method < test->size; ++method) {
+        for (size_t group = 0; group < test->methods[method].size; ++group) {
+            for (size_t i = 0; i < test->methods[method].groups[group].size;
+                 ++i) {
+                sum += test->methods[method].groups[group].execTime[i] *
+                       test->methods[method].groups[group].weight[i];
+                sz += test->methods[method].groups[group].weight[i];
+            }
+        }
+    }
+    return sum / sz;
+}
+size_t get_groups_totalsz(TEST_METHOD_T *method)
+{
+    size_t sz = 0;
+    for (size_t group = 0; group < method->size; ++group) {
+        sz += method->groups[group].processed_size;
+    }
+    return sz;
+}
+double calculate_groups_mean(TEST_METHOD_T *method)
+{
+    double sum = 0.0f;
+    double sz = 0.0f;
+
+    for (size_t group = 0; group < method->size; ++group) {
+        for (size_t i = 0; i < method->groups[group].size; ++i) {
+            sum += method->groups[group].execTime[i] *
+                   method->groups[group].weight[i];
+            sz += method->groups[group].weight[i];
+        }
+    }
+
+    return sum / sz;
+}
+double calculate_groups_stddev(TEST_METHOD_T *method, double mean)
+{
+    double sum_of_squares = 0.0;
+    double total_size = 0.0f;
+    for (size_t group = 0; group < method->size; ++group) {
+        for (size_t i = 0; i < method->groups[group].size; ++i) {
+            sum_of_squares +=
+                pow(method->groups[group].execTime[i] - mean, 2.0) *
+                method->groups[group].weight[i];
+            total_size += 1.0f * method->groups[group].weight[i];
+        }
+    }
+    return sqrt(sum_of_squares / (total_size - 1.0f));
+}
+long double calculate_sample_size(TEST_METHOD_T *method)
+{
+    long double sz = 0;
+    for (size_t group = 0; group < method->size; ++group) {
+        for (size_t i = 0; i < method->groups[group].size; ++i) {
+            sz += method->groups[group].weight[i];
+        }
+    }
+    return sz;
+}
+
+
+double calculate_Fvalue(TEST_RESULT_T *test)
+{
+    double totalmean = calculate_totalmean(test);
+    double totalsz = 0.0f;
+    double MSTR = 0.0f, MSE = 0.0f;
+    double f_value = 0.0;
+    for (size_t method = 0; method < test->size; ++method) {
+        totalsz += 1.0f * get_groups_totalsz(&(test->methods[method]));
+    }
+
+    double df1 = (1.0f * test->size) - 1.0f;
+    double df2 = (1.0f * totalsz) - (1.0f * test->size);
+    for (size_t method = 0; method < test->size; ++method) {
+        long double size = calculate_sample_size(&(test->methods[method]));
+        double mean = calculate_groups_mean(&(test->methods[method]));
+        MSTR += (mean - totalmean) * (mean - totalmean) * (1.0f * size);
+        double stddev = calculate_groups_stddev(&(test->methods[method]), mean);
+        MSE += ((size - 1.0f) * stddev * stddev);
+        // printf("size:%lf mean = %f stddev:%f\n",size, mean, stddev);
+    }
+    MSTR /= (1.0f * (df1));
+    MSE /= 1.0f * (df2);
+    f_value = MSTR / MSE;
+    double p_value = 1 - gsl_cdf_fdist_P(f_value, df1, df2);
+    printf("df1 = %f\n", df1);
+    printf("df2 = %f\n", df2);
+    printf("MSTR = %f\n", MSTR);
+    printf("MSE = %f\n", MSE);
+
+    printf("p_value = %f\n", p_value);
+    printf("f_value = %f\n", f_value);
+}
+
+
+
+void validate_cal_Fvalue()
+{
+    // df1: 6
+    // df2: 2
+    // MSB: 19.163878
+    // MSE: 0.045100
+    // F-value: 424.919685
+    // P-value: 0.000000
+    TEST_RESULT_T *test = malloc(sizeof(TEST_RESULT_T));
+    test->size = 3;
+    test->methods = malloc(sizeof(TEST_METHOD_T) * test->size);
+    test->methods->size = 3;
+
+    test->methods[0].size = 1;
+    test->methods[0].groups = malloc(sizeof(result_t) * 1);
+    test->methods[0].groups[0].processed_size = 3;
+    test->methods[0].groups[0].size = 3;
+    test->methods[0].groups[0].execTime = malloc(sizeof(double) * 3);
+    test->methods[0].groups[0].weight = malloc(sizeof(double) * 3);
+    test->methods[0].groups[0].execTime[0] = 10.1;
+    test->methods[0].groups[0].execTime[1] = 10.23;
+    test->methods[0].groups[0].execTime[2] = 9.8;
+    test->methods[0].groups[0].weight[0] = 1.0;
+    test->methods[0].groups[0].weight[1] = 1.0;
+    test->methods[0].groups[0].weight[2] = 1.0;
+
+    test->methods[1].size = 1;
+    test->methods[1].groups = malloc(sizeof(result_t) * 1);
+    test->methods[1].groups[0].processed_size = 3;
+    test->methods[1].groups[0].size = 3;
+    test->methods[1].groups[0].execTime = malloc(sizeof(double) * 3);
+    test->methods[1].groups[0].weight = malloc(sizeof(double) * 3);
+    test->methods[1].groups[0].execTime[0] = 12.1;
+    test->methods[1].groups[0].execTime[1] = 12.3;
+    test->methods[1].groups[0].execTime[2] = 11.8;
+    test->methods[1].groups[0].weight[0] = 1.0;
+    test->methods[1].groups[0].weight[1] = 1.0;
+    test->methods[1].groups[0].weight[2] = 1.0;
+
+    test->methods[2].size = 1;
+    test->methods[2].groups = malloc(sizeof(result_t) * 1);
+    test->methods[2].groups[0].processed_size = 3;
+    test->methods[2].groups[0].size = 3;
+    test->methods[2].groups[0].execTime = malloc(sizeof(double) * 3);
+    test->methods[2].groups[0].weight = malloc(sizeof(double) * 3);
+    test->methods[2].groups[0].execTime[0] = 15.1;
+    test->methods[2].groups[0].execTime[1] = 15.2;
+    test->methods[2].groups[0].execTime[2] = 14.9;
+    test->methods[2].groups[0].weight[0] = 1.0;
+    test->methods[2].groups[0].weight[1] = 1.0;
+    test->methods[2].groups[0].weight[2] = 1.0;
+
+    calculate_Fvalue(test);
+}

@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -O0 -g -w
-
+CFLAGS = -O2 -g -w
+LDFLAGS = -lgsl -lgslcblas -lm
 all: main data
 
 
@@ -11,10 +11,10 @@ DATAS := gendata.o proc_data.o random.o
 data_deps := $(DATAS:%.o=.%.o.d)
 
 main: $(OBJS)
-	$(CC) -o $@ $(LDFLAGS) $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 data: $(DATAS)
-	$(CC) -o $@ $(LDFLAGS) $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 $.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c -MMD -MF .$@.d $<

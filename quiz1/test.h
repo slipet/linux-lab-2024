@@ -2,6 +2,8 @@
 #define __TEST__
 #include <assert.h>
 #include <bits/types.h>
+#include <gsl/gsl_cdf.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -51,5 +53,22 @@ void free_testcases(testCases *);
 uint32_t *read_testcases(char *, uint32_t *);
 char *getFileName(Path_t *, size_t);
 void fixed_quantity_test(expConfig *, Path_t *, const size_t, const size_t);
-void random_quantity_test(expConfig *, Path_t *, const size_t, const size_t, int);
+void random_quantity_test(expConfig *,
+                          Path_t *,
+                          const size_t,
+                          const size_t,
+                          const size_t,
+                          int);
+void repeated_fixed_quantity_test(expConfig *,
+                                  Path_t *,
+                                  const size_t,
+                                  const size_t,
+                                  const size_t,
+                                  int);
+
+double calculate_mean(double *, double *, size_t);
+double calculate_stddev(double *, double *, size_t, double);
+double calculate_groups_stddev(TEST_METHOD_T *, double);
+double calculate_Fvalue(TEST_RESULT_T *);
+
 #endif
